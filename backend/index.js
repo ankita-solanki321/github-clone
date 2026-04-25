@@ -4,6 +4,7 @@ const cors = require("cors");
 const mongoose = require("mongoose");
 const bodyParser = require("body-parser");
 const http = require("http");
+const { Server } =require("socket.io");
 
 const yargs = require('yargs');
 const {hideBin} = require("yargs/helpers");
@@ -72,5 +73,42 @@ yargs(hideBin(process.argv))
     app.use(express.json());
 
     const mongoURI = process.env.MONGODB_URI;
-    mongoose.connect(mongoURI).then(() => console.log("MongoDb Connected!")).catch((err) => console.error("unable to connect:" ,err));
+    mongoose.connect(mongoURI)
+    .then(() => console.log("MongoDb Connected!"))
+    .catch((err) => console.error("unable to connect:" ,err));
+
+    app.use(cors({ origin: "*" }));
+
+    app.get("/" , (req,res) => {
+        res.send("Welcome");
+    });
+    
+    let user = "test";
+    const httpServer = http.createServer(app);
+    const io = new Server(httpServer , {  // this is used for live interaction and connection 
+        cors :{
+            origin: "*",
+            methods: ["GET" ,"POST"],
+        },
+    });
+
+    io.on("connection" , (socket) => {
+        socket.on("joinRoom" ,(userID) =>{ //add  the user on that connection
+         user = userID;
+         console.log("====");
+         console.log(user);
+         console.log("====");
+         socket.join(userID);
+        });
+    });
+
+    const db = mongoose.connection;
+
+    db.once("open" , async () => {  // once   => means ek bar connect karege ek baar hi open karenge bcz its multiple request ayyegi we make it async multiple request follow hogii
+        console.log("CRUD operations are called!");
+    });
+    
+    httpServer.listen(port , () => {
+     console.log(`Server is running on port ${port}`);
+    });
    }
