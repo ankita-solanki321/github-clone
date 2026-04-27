@@ -5,6 +5,7 @@ const mongoose = require("mongoose");
 const bodyParser = require("body-parser");
 const http = require("http");
 const { Server } =require("socket.io");
+const mainRouter = require("./Routes/main.router")
 
 const yargs = require('yargs');
 const {hideBin} = require("yargs/helpers");
@@ -67,7 +68,7 @@ yargs(hideBin(process.argv))
 
    function startServer(){
     const app = express();
-    const port =  process.env.PORT || 30000; //These platforms automatically assign a port and store it in process.env.PORT. If you hardcode 3000 your app will crash on their server! ❌
+    const port =  process.env.PORT || 3000; //These platforms automatically assign a port and store it in process.env.PORT. If you hardcode 3000 your app will crash on their server! ❌
 
     app.use(bodyParser.json());
     app.use(express.json());
@@ -78,10 +79,7 @@ yargs(hideBin(process.argv))
     .catch((err) => console.error("unable to connect:" ,err));
 
     app.use(cors({ origin: "*" }));
-
-    app.get("/" , (req,res) => {
-        res.send("Welcome");
-    });
+    app.use("/", mainRouter);
     
     let user = "test";
     const httpServer = http.createServer(app);
