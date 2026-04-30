@@ -35,18 +35,47 @@ async function createRepository(req, res) {
     res.status(500).send("Server error");
   }
 }
-const getAllRepositories = (req ,res) =>{
-    res.send("All repos");
-    
+async function getAllRepositories(req, res) {
+  try {
+    const repositories = await Repository.find({})
+      .populate("owner")  //we were using this poopulate so that in output instead of object id we saw the content of that object id
+      .populate("issues");
+
+    res.json(repositories);
+  } catch (err) {
+    console.error("Error during fetching repositories : ", err.message);
+    res.status(500).send("Server error");
+  }
 }
-const fetchRepositoryById = (req ,res) =>{
-    res.send("REpo by id");
-    
+
+async function fetchRepositoryById(req, res) {
+  const { id } = req.params;
+  try {
+    const repository = await Repository.find({ _id: id })
+      .populate("owner")
+      .populate("issues");
+
+    res.json(repository);
+  } catch (err) {
+    console.error("Error during fetching repository : ", err.message);
+    res.status(500).send("Server error");
+  }
 }
-const fetchRepositoryByName = (req ,res) =>{
-    res.send("REpo by name");
-    
+
+async function fetchRepositoryByName(req, res) {
+  const { name } = req.params;
+  try {
+    const repository = await Repository.find({ name })
+      .populate("owner")
+      .populate("issues");
+
+    res.json(repository);
+  } catch (err) {
+    console.error("Error during fetching repository : ", err.message);
+    res.status(500).send("Server error");
+  }
 }
+
 const fetchRepositoriesForCurrentUser = (req ,res) =>{
     res.send("REpo for current user");
     
